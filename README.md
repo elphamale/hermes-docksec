@@ -106,7 +106,16 @@ Make sure `~/.local/bin` is on your `PATH` (or point `DOCKSEC_EXTRA_PATH` at it)
 
 ## Setup
 
-With the [prerequisites](#prerequisites) in place:
+**Quick path (Linux x86_64):** `deploy.sh` handles everything below automatically
+— binaries, venv, and file copies. It prints a clear list of what it will do and
+asks for confirmation before touching anything. The script leaves config.yaml and
+.env alone (credentials stay yours); it prints the remaining manual steps on exit.
+
+```bash
+chmod +x deploy.sh && ./deploy.sh
+```
+
+**Manual path** — with the [prerequisites](#prerequisites) in place:
 
 ```bash
 # 1) Install dependencies — dedicated 3.12 venv for the worker (docksec needs >=3.12)
@@ -134,7 +143,7 @@ cp .env.example .env   # then edit
 | Ollama (local) | `http://localhost:11434/v1` | `ollama` | `llama3.1` |
 
 > A locally self-hosted `manifestdotbuild/manifest` web app (commonly on
-> `:2099`) is a **dashboard, not an LLM endpoint** — its `/v1/chat/completions`
+> `localhost:2099`) is a **dashboard, not an LLM endpoint** — its `/v1/chat/completions`
 > returns 404. Use the hosted router URL above or another provider.
 
 If `DOCKSEC_LLM_BASE_URL` is unset, AI recommendations are silently skipped and
