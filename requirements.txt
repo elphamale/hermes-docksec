@@ -5,3 +5,7 @@ docksec
 # OpenAI-compatible client — used by docksec_tool.py for AI recommendations.
 # Install in whichever environment runs docksec_tool.py (e.g. the Hermes venv).
 openai
+
+# NOTE: Trivy and Hadolint are also required, but they are standalone binaries
+# (Go / Haskell), not Python packages — they cannot be installed via pip.
+# See the "Prerequisites" section of README.md for how to install them.
