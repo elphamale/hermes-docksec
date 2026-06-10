@@ -1,0 +1,7 @@
+# DockSec scanner — installed in the dedicated Python 3.12 worker venv.
+# (Requires Python >= 3.12; do NOT install into a 3.11 environment.)
+docksec
+
+# OpenAI-compatible client — used by docksec_tool.py for AI recommendations.
+# Install in whichever environment runs docksec_tool.py (e.g. the Hermes venv).
+openai
