@@ -473,3 +473,68 @@ registry.register(
     emoji="🛡️",
 )
 
+
+def list_docker_images(include_untagged: bool = False) -> list:
+    """List Docker images in the host daemon's local store (host-side).
+
+    Companion to scan_docker: an agent running in a sandbox can't enumerate host
+    images (no docker.sock), so it can't know what to scan. This runs host-side
+    where scan_docker also runs, returning the image refs available to scan.
+    """
+    import subprocess
+
+    env = dict(os.environ)
+    if _EXTRA_PATH:
+        env["PATH"] = _EXTRA_PATH + os.pathsep + env.get("PATH", "")
+    proc = subprocess.run(
+        ["docker", "images", "--format", "{{.Repository}}:{{.Tag}}"],
+        capture_output=True, text=True, timeout=30, env=env,
+    )
+    if proc.returncode != 0:
+        raise RuntimeError((proc.stderr or "docker images failed").strip()[:300])
+    imgs = {
+        line.strip()
+        for line in proc.stdout.splitlines()
+        if line.strip() and (include_untagged or "<none>" not in line)
+    }
+    return sorted(imgs)
+
+
+def _list_docker_images_handler(args, **kwargs):
+    try:
+        imgs = list_docker_images(include_untagged=bool(args.get("include_untagged", False)))
+    except Exception as e:  # noqa: BLE001
+        return tool_result({"error": str(e)})
+    return tool_result({"images": imgs, "count": len(imgs)})
+
+
+registry.register(
+    name="list_docker_images",
+    toolset="docksec",
+    schema={
+        "name": "list_docker_images",
+        "description": (
+            "List Docker images available locally on the host, so they can be "
+            "passed to scan_docker. Returns {images: [...], count: N}. Use this "
+            "first when asked to scan 'all' images — the agent sandbox cannot "
+            "enumerate host images on its own."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "include_untagged": {
+                    "type": "boolean",
+                    "description": "Include <none>:<none> dangling images (default false).",
+                },
+            },
+            "required": [],
+        },
+    },
+    handler=_list_docker_images_handler,
+    check_fn=_check_docksec_available,
+    requires_env=[],
+    is_async=False,
+    description="List local Docker images on the host",
+    emoji="📦",
+)
+
